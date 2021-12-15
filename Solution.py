@@ -173,79 +173,101 @@ def getMatchProfile(matchID: int) -> Match:
 def deleteMatch(match: Match) -> ReturnValue:
     pass
 
-
+#arkadi HA-GAY
 def addPlayer(player: Player) -> ReturnValue:
     pass
 
-
+#arkadi HA-GAY
 def getPlayerProfile(playerID: int) -> Player:
     pass
 
-
+#arkadi HA-GAY
 def deletePlayer(player: Player) -> ReturnValue:
     pass
 
-
+#EDEM
 def addStadium(stadium: Stadium) -> ReturnValue:
     pass
 
-
+#EDEM
 def getStadiumProfile(stadiumID: int) -> Stadium:
     pass
 
-
+#EDEM
 def deleteStadium(stadium: Stadium) -> ReturnValue:
     pass
 
 
 def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValue:
-    pass
+    conn = None
+    try:
+        conn = Connector.DBConnector()
+        player_scored_query = sql.SQL("INSERT INTO Scored(Player_Id, Match_Id, Goals)"
+                                      "VALUES({Player_Id},{Match_Id},{Goals})").\
+                                    format(Player_Id=sql.Literal(player.getPlayerID()),
+                                           Match_Id=sql.Literal(match.getMatchID()),Goals=sql.Literal(amount))
+        _ = conn.execute(player_scored_query)
+    except DatabaseException.ConnectionInvalid:
+        return ReturnValue.ERROR
+    except DatabaseException.NOT_NULL_VIOLATION:
+        return ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION:
+        return ReturnValue.BAD_PARAMS
+    except DatabaseException.UNIQUE_VIOLATION:
+        return ReturnValue.ALREADY_EXISTS
+    except DatabaseException.FOREIGN_KEY_VIOLATION:
+        return ReturnValue.NOT_EXISTS
+    except Exception:
+        return ReturnValue.ERROR
+    finally:
+        conn.close()
+        return ReturnValue.OK
 
-
+#EDEN
 def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
     pass
 
-
+#EDEM
 def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnValue:
     pass
 
-
+#arkadi HA-GAY
 def matchNotInStadium(match: Match, stadium: Stadium) -> ReturnValue:
     pass
 
-
+#arkadi HA-GAY
 def averageAttendanceInStadium(stadiumID: int) -> float:
     pass
 
-
+#EDEM
 def stadiumTotalGoals(stadiumID: int) -> int:
     pass
 
-
+#arkadi HA-GAY
 def playerIsWinner(playerID: int, matchID: int) -> bool:
     pass
 
-
+#eden
 def getActiveTallTeams() -> List[int]:
     pass
 
-
+#arkadi HA-GAY
 def getActiveTallRichTeams() -> List[int]:
     pass
 
-
+#eden
 def popularTeams() -> List[int]:
     pass
 
-
+#eden
 def getMostAttractiveStadiums() -> List[int]:
     pass
 
-
+#arkadi HA-GAY
 def mostGoalsForTeam(teamID: int) -> List[int]:
     pass
 
-
+#the one that finished the rest
 def getClosePlayers(playerID: int) -> List[int]:
     pass
 
