@@ -133,17 +133,12 @@ def dropTables():
 
 
 def addTeam(teamID: int) -> ReturnValue:
-<<<<<<< HEAD
-    conn = None
-    ret_value = None
-=======
     """
     Add Team to the database
     :param teamID: teamID to be added
     :return: Return value assoicated with the result of the action
     """
     ret_value, conn = None, None
->>>>>>> eden_functions
     try:
         conn = Connector.DBConnector()
         add_team_query = sql.SQL("INSERT INTO Team(Team_Id) "
@@ -158,25 +153,15 @@ def addTeam(teamID: int) -> ReturnValue:
         ret_value = ReturnValue.BAD_PARAMS
     except DatabaseException.UNIQUE_VIOLATION:
         ret_value = ReturnValue.ALREADY_EXISTS
-<<<<<<< HEAD
     except DatabaseException.FOREIGN_KEY_VIOLATION:
         ret_value = ReturnValue.BAD_PARAMS
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
         return ret_value
-<<<<<<< HEAD
-
-def addMatch(match: Match) -> ReturnValue:
-    conn = None
-    ret_value = None
-=======
 
 
 def addMatch(match: Match) -> ReturnValue:
@@ -186,7 +171,6 @@ def addMatch(match: Match) -> ReturnValue:
     :return: Return value assoicated with the result of the action
     """
     ret_value, conn = None, None
->>>>>>> eden_functions
     try:
         conn = Connector.DBConnector()
         add_match_query = sql.SQL("INSERT INTO Match(Match_Id, Competition, Home_Team_Id, Away_Team_Id) "
@@ -205,13 +189,9 @@ def addMatch(match: Match) -> ReturnValue:
         ret_value = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION:
         ret_value = ReturnValue.BAD_PARAMS
-<<<<<<< HEAD
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
@@ -219,32 +199,6 @@ def addMatch(match: Match) -> ReturnValue:
 
 
 def getMatchProfile(matchID: int) -> Match:
-<<<<<<< HEAD
-    res = None
-    rows_effected, result = 0, ResultSet()
-    match = Match()
-    conn = Connector.DBConnector()
-    query = sql.SQL("SELECT * FROM Match WHERE Match_Id={0}").format(sql.Literal(matchID))
-    rows_effected, result = conn.execute(query)
-    if rows_effected == 1:
-        match.setMatchID(result.rows[0][0])
-        match.setCompetition(result.rows[0][1])
-        match.setHomeTeamID(result.rows[0][2])
-        match.setAwayTeamID(result.rows[0][3])
-        conn.close()
-        return match
-    conn.close()
-    return match.badMatch()
-
-
-def deleteMatch(match: Match) -> ReturnValue:
-    conn = None
-    ret_value = None
-    try:
-        conn = Connector.DBConnector()
-        query = sql.SQL("DELETE FROM Match WHERE Match_Id={0}").format(sql.Literal(match.getMatchID()))
-        rows_effected, _ = conn.execute(query)
-=======
     """
     Returns match profile  of matchID
     :param matchID: integer
@@ -271,6 +225,7 @@ def deleteMatch(match: Match) -> ReturnValue:
         return ret_match
 
 
+
 def deleteMatch(match: Match) -> ReturnValue:
     """
     Delete a match from the database
@@ -282,7 +237,6 @@ def deleteMatch(match: Match) -> ReturnValue:
         conn = Connector.DBConnector()
         delete_match_query = sql.SQL("DELETE FROM Match WHERE Match_Id={0}").format(sql.Literal(match.getMatchID()))
         rows_effected, _ = conn.execute(delete_match_query)
->>>>>>> eden_functions
         if rows_effected == 0:
             ret_value = ReturnValue.NOT_EXISTS
         else:
@@ -296,15 +250,10 @@ def deleteMatch(match: Match) -> ReturnValue:
     except DatabaseException.UNIQUE_VIOLATION:
         ret_value = ReturnValue.ERROR
     except DatabaseException.FOREIGN_KEY_VIOLATION:
-<<<<<<< HEAD
-        ret_value = ReturnValue.NOT_EXISTS
-    except Exception:
-=======
         ret_value = ReturnValue.NOT_EXISTS # TODO: check the foreign key error
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
@@ -312,32 +261,7 @@ def deleteMatch(match: Match) -> ReturnValue:
 
 #arkadi HA-GAY
 def addPlayer(player: Player) -> ReturnValue:
-    conn = None
-    ret_value = None
-    try:
-        add_player_query = sql.SQL("INSERT INTO Player(Player_Id, Team_Id, Age, Height, Preferred_Foot) "
-                                   "VALUES({Player_Id},{Team_Id}, {Age}, {Height}, {Preferred_Foot})"). \
-            format(Player_Id=sql.Literal(player.getPlayerID()), Team_Id=sql.Literal(player.getTeamID()),
-                   Age=sql.Literal(player.getAge()), Height=sql.Literal(player.getHeight()),
-                   Preferred_Foot=sql.Literal(player.getFoot()))
-        conn = Connector.DBConnector()
-        _ = conn.execute(add_player_query)
-        ret_value = ReturnValue.OK
-    except DatabaseException.ConnectionInvalid:
-        ret_value = ReturnValue.ERROR
-    except DatabaseException.NOT_NULL_VIOLATION:
-        ret_value = ReturnValue.BAD_PARAMS
-    except DatabaseException.CHECK_VIOLATION:
-        ret_value = ReturnValue.BAD_PARAMS
-    except DatabaseException.UNIQUE_VIOLATION:
-        ret_value = ReturnValue.ALREADY_EXISTS
-    except DatabaseException.FOREIGN_KEY_VIOLATION:
-        ret_value = ReturnValue.BAD_PARAMS
-    except Exception:
-        ret_value = ReturnValue.ERROR
-    finally:
-        conn.close()
-        return ret_value
+    pass
 
 #arkadi HA-GAY
 def getPlayerProfile(playerID: int) -> Player:
@@ -349,21 +273,6 @@ def deletePlayer(player: Player) -> ReturnValue:
 
 #EDEM
 def addStadium(stadium: Stadium) -> ReturnValue:
-<<<<<<< HEAD
-    conn = None
-    ret_value = None
-    try:
-        conn = Connector.DBConnector()
-        add_stadium_query = sql.SQL("INSERT INTO Stadium(Stadium_Id, Capacity, Belong_to)"
-                                  " VALUES({Stadium_Id},{Capacity},{Belong_to})"). \
-            format(Stadium_Id=sql.Literal(stadium.getStadiumID()), Capacity=sql.Literal(stadium.getCapacity()),
-                   Belong_to=sql.Literal(stadium.getBelongsTo()))
-        rows_effected, _ = conn.execute(add_stadium_query)
-        if rows_effected == 0:
-            ret_value = ReturnValue.BAD_PARAMS
-        else:
-            ret_value = ReturnValue.OK
-=======
     """
     Add Stadium to the database
     :param stadium:  stadium class instance
@@ -381,7 +290,6 @@ def addStadium(stadium: Stadium) -> ReturnValue:
         #     ret_value = ReturnValue.BAD_PARAMS
         # else:
         ret_value = ReturnValue.OK
->>>>>>> eden_functions
     except DatabaseException.ConnectionInvalid:
         ret_value = ReturnValue.ERROR
     except DatabaseException.NOT_NULL_VIOLATION:
@@ -392,41 +300,17 @@ def addStadium(stadium: Stadium) -> ReturnValue:
         ret_value = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION:
         ret_value = ReturnValue.BAD_PARAMS
-<<<<<<< HEAD
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
         return ret_value
 
-#EDEM
-def getStadiumProfile(stadiumID: int) -> Stadium:
-<<<<<<< HEAD
-    res = None
-    rows_effected, result = 0, ResultSet()
-    stadium = Stadium()
-    conn = Connector.DBConnector()
-    query = sql.SQL("SELECT * FROM Stadium WHERE stadium_Id={0}").format(sql.Literal(stadiumID))
-    rows_effected, result = conn.execute(query)
-    if rows_effected == 1:
-        stadium.setStadiumID(result.rows[0][0])
-        stadium.setCapacity(result.rows[0][1])
-        stadium.setBelongsTo(result.rows[0][2])
-        conn.close()
-        return stadium
-    conn.close()
-    return stadium.badStadium()
 
 #EDEM
-def deleteStadium(stadium: Stadium) -> ReturnValue:
-    conn = None
-    ret_value = None
-=======
+def getStadiumProfile(stadiumID: int) -> Stadium:
     """
     Returns stadium profile of stadiumID
     :param stadiumID: integer
@@ -459,7 +343,6 @@ def deleteStadium(stadium: Stadium) -> ReturnValue:
     :return: Return value assoicated with the result of the action
     """
     ret_value, conn = None, None
->>>>>>> eden_functions
     try:
         conn = Connector.DBConnector()
         query = sql.SQL("DELETE FROM Match WHERE Stadium_Id={0}").format(sql.Literal(stadium.getStadiumID()))
@@ -478,13 +361,9 @@ def deleteStadium(stadium: Stadium) -> ReturnValue:
         ret_value = ReturnValue.ERROR
     # except DatabaseException.FOREIGN_KEY_VIOLATION:
     #     ret_value = ReturnValue.NOT_EXISTS
-<<<<<<< HEAD
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
@@ -492,10 +371,6 @@ def deleteStadium(stadium: Stadium) -> ReturnValue:
 
 
 def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValue:
-<<<<<<< HEAD
-    conn = None
-    ret_value = None
-=======
     """
     Player has scored amount of goals in match
     :param  match: match class instance
@@ -504,18 +379,13 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
     :return: Return value assoicated with the result of the action
     """
     ret_value, conn = None, None
->>>>>>> eden_functions
     try:
         conn = Connector.DBConnector()
         player_scored_query = sql.SQL("INSERT INTO Scored(Player_Id, Match_Id, Goals)"
                                       "VALUES({Player_Id},{Match_Id},{Goals})").\
             format(Player_Id=sql.Literal(player.getPlayerID()),
-<<<<<<< HEAD
-                   Match_Id=sql.Literal(match.getMatchID()), Goals=sql.Literal(amount))
-=======
                    Match_Id=sql.Literal(match.getMatchID()),
                    Goals=sql.Literal(amount))
->>>>>>> eden_functions
         rows_effected, _ = conn.execute(player_scored_query)
         if rows_effected == 0:
             ret_value = ReturnValue.NOT_EXISTS
@@ -531,13 +401,9 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
         ret_value = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION:
         ret_value = ReturnValue.NOT_EXISTS
-<<<<<<< HEAD
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
@@ -545,11 +411,6 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
 
 #EDEN
 def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
-<<<<<<< HEAD
-    conn = None
-    ret_value = None
-    rows_effected = 0
-=======
     """
     Player didnt scored in match, if the player did, delete its record
     :param  match: match class instance
@@ -559,7 +420,6 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
     """
     ret_value, conn = None, None
     # rows_effected = 0
->>>>>>> eden_functions
     try:
         conn = Connector.DBConnector()
         player_unscored_query = sql.SQL("DELETE FROM Scored WHERE Player_Id={0} AND Match_Id={0}").\
@@ -581,13 +441,9 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
         ret_value = ReturnValue.ERROR
     except DatabaseException.FOREIGN_KEY_VIOLATION:
         ret_value = ReturnValue.NOT_EXISTS
-<<<<<<< HEAD
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
@@ -595,10 +451,6 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
 
 #EDEM
 def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnValue:
-<<<<<<< HEAD
-    conn = None
-    ret_value = None
-=======
     """
     The match is taking place in stadium with attendance spectators
     :param  match: match class instance
@@ -607,18 +459,13 @@ def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnVal
     :return: Return value assoicated with the result of the action
     """
     ret_value, conn = None, None
->>>>>>> eden_functions
     try:
         conn = Connector.DBConnector()
         player_scored_query = sql.SQL("INSERT INTO Took_Place(Match_Id, Stadium_Id, Spectators)"
                                       "VALUES({Match_Id},{Stadium_Id},{Spectators})"). \
             format(Match_Id=sql.Literal(match.getMatchID()),
-<<<<<<< HEAD
-                   Stadium_Id=sql.Literal(stadium.getStadiumID()), Spectators=sql.Literal(attendance))
-=======
                    Stadium_Id=sql.Literal(stadium.getStadiumID()),
                    Spectators=sql.Literal(attendance))
->>>>>>> eden_functions
         rows_effected, _ = conn.execute(player_scored_query)
         if rows_effected == 0:
             ret_value = ReturnValue.NOT_EXISTS
@@ -634,13 +481,9 @@ def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnVal
         ret_value = ReturnValue.ALREADY_EXISTS
     except DatabaseException.FOREIGN_KEY_VIOLATION:
         ret_value = ReturnValue.NOT_EXISTS
-<<<<<<< HEAD
-    except Exception:
-=======
     except DatabaseException.database_ini_ERROR:
         ret_value = ReturnValue.ERROR
     except DatabaseException.UNKNOWN_ERROR:
->>>>>>> eden_functions
         ret_value = ReturnValue.ERROR
     finally:
         conn.close()
@@ -656,26 +499,6 @@ def averageAttendanceInStadium(stadiumID: int) -> float:
 
 #EDEM
 def stadiumTotalGoals(stadiumID: int) -> int:
-<<<<<<< HEAD
-    conn = None
-    res = None
-    rows_effected, result = 0, ResultSet()
-    try:
-        conn = Connector.DBConnector()
-        query = sql.SQL("SELECT COALESCE(SUM(Goals), 0) FROM Goals_In_Stadium WHERE Stadium_Id={0}").format(sql.Literal(stadiumID))
-        rows_effected, result = conn.execute(query)
-        if rows_effected == 1:
-            res = result.rows[0][0]
-        elif rows_effected == 0:
-            res = 0
-        else:
-            res = -1
-    except Exception:
-        res = -1
-    finally:
-        conn.close()
-        return res
-=======
     """
     Returns the total amount of goals scored in stadium with stadiumID
     :param  stadiumID: integer
@@ -700,7 +523,6 @@ def stadiumTotalGoals(stadiumID: int) -> int:
     finally:
         conn.close()
         return ret_sum
->>>>>>> eden_functions
 
 #arkadi HA-GAY
 def playerIsWinner(playerID: int, matchID: int) -> bool:
@@ -708,20 +530,6 @@ def playerIsWinner(playerID: int, matchID: int) -> bool:
 
 #eden
 def getActiveTallTeams() -> List[int]:
-<<<<<<< HEAD
-    active_tall_teams_list = []
-    conn = Connector.DBConnector()
-    result = conn.execute("SELECT P.Team_Id FROM Player P, Active_Teams T "
-                          "WHERE P.Team_Id=T.Home_Team_Id AND P.Height>190 "
-                          "GROUP BY P.Team_Id "
-                          "HAVING COUNT(P.Player_Id)>=2 "
-                          "ORDER BY P.Team_Id DESC "
-                          "LIMIT 5")
-    for team in result[1].rows:
-        active_tall_teams_list.append(team[0])
-    conn.close()
-    return active_tall_teams_list
-=======
     """
     Returns ta list(up to size 5) of active teams'ID that have at least 2 players over the height of 190cm.
     Active team is a team who played at least 1 match at home or away
@@ -746,7 +554,6 @@ def getActiveTallTeams() -> List[int]:
     finally:
         conn.close()
         return active_tall_teams_list
->>>>>>> eden_functions
 
 #arkadi HA-GAY
 def getActiveTallRichTeams() -> List[int]:
@@ -754,37 +561,6 @@ def getActiveTallRichTeams() -> List[int]:
 
 #eden
 def popularTeams() -> List[int]:
-<<<<<<< HEAD
-    popular_teams_list = []
-    conn = Connector.DBConnector()
-    result = conn.execute("SELECT Home_Team_Id "
-                          "FROM Home_Teams_Stadiums "
-                          "GROUP BY Home_Team_Id "
-                          "HAVING MIN(Spectators)>40000 "
-                          "UNION "
-                          "SELECT Away_Team_Id "
-                          "FROM Match "
-                          "WHERE Away_Team_Id NOT IN(SELECT Home_Team_Id FROM Match) "
-                          "ORDER BY Home_Team_Id DESC "
-                          "LIMIT 10")
-    for team in result[1].rows:
-        popular_teams_list.append(team[0])
-    conn.close()
-    return popular_teams_list
-
-#eden
-def getMostAttractiveStadiums() -> List[int]:
-    most_attractive_stadiums_list = []
-    conn = Connector.DBConnector()
-    result = conn.execute("SELECT Stadium_Id, COALESCE(SUM(Goals), 0) "
-                          "FROM Goals_In_Stadium "
-                          "GROUP BY Stadium_Id "
-                          "ORDER BY COALESCE(SUM(Goals), 0) DESC, Stadium_Id ASC")
-    for team in result[1].rows:
-        most_attractive_stadiums_list.append(team[0])
-    conn.close()
-    return most_attractive_stadiums_list
-=======
     """
     Returns a list (up to size 10) of teams' IDs that in every single game they played as 'home team'
     they had more than 40,000 attendance.
@@ -838,7 +614,6 @@ def getMostAttractiveStadiums() -> List[int]:
     finally:
         conn.close()
         return most_attractive_stadiums_list
->>>>>>> eden_functions
 
 #arkadi HA-GAY
 def mostGoalsForTeam(teamID: int) -> List[int]:
