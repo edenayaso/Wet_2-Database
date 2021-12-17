@@ -1,7 +1,11 @@
 from Solution import *
 
 if __name__ == '__main__':
+<<<<<<< HEAD
     dropTables()
+=======
+    #dropTables()
+>>>>>>> eden_functions
     print("--------- SET UP - START ---------")
     createTables()
     print("ADDING TEAMS")
