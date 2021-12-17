@@ -55,7 +55,7 @@ def createTables():
 
     schema = "CREATE TABLE Took_Place(" \
              "Match_Id INTEGER REFERENCES Match " \
-             "ON DELETE CASCADE," \
+             "ON DELETE CASCA DE," \
              "Stadium_Id INTEGER REFERENCES Stadium " \
              "ON DELETE CASCADE," \
              "Spectators INTEGER NOT NULL CHECK(Spectators>0)," \
@@ -261,11 +261,65 @@ def deleteMatch(match: Match) -> ReturnValue:
 
 #arkadi HA-GAY
 def addPlayer(player: Player) -> ReturnValue:
-    pass
+    """
+    Add player to the database
+    :param player: player class instance
+    :return: Return value assoicated with the result of the action
+    """
+    conn = None
+    return_value = ReturnValue.OK
+    try:
+        conn = Connector.DBConnector()
+        add_player_query = sql.SQL("INSERT INTO PLAYER(Player_Id, Team_Id, Age, Height, Preferred_Foot)"
+                                   "VALUES({Player_Id}, {Team_Id}, {Age}, {Height}, {Preferred_Foot});").format(Player_Id=sql.Literal(player.getPlayerID()),
+                                    Team_Id=sql.Literal(player.getTeamID()),
+                                    Age=sql.Literal(player.getAge()),
+                                    Height=sql.Literal(player.getHeight()),
+                                    Preferred_Foot=sql.Literal(player.getFoot()))
+        _ = conn.execute(add_player_query)
+    except DatabaseException.ConnectionInvalid:
+        return_value = ReturnValue.ERROR
+    except DatabaseException.UNIQUE_VIOLATION:
+        return_value = ReturnValue.ALREADY_EXISTS
+    except DatabaseException.NOT_NULL_VIOLATION:
+        return_value = ReturnValue.BAD_PARAMS
+    except DatabaseException.CHECK_VIOLATION:
+        return_value = ReturnValue.BAD_PARAMS
+    except DatabaseException.database_ini_ERROR:
+        return_value = ReturnValue.ERROR
+    finally:
+        conn.close()
+        return return_value
 
 #arkadi HA-GAY
 def getPlayerProfile(playerID: int) -> Player:
-    pass
+    """
+    Returns player profile
+    :param playerID: integer
+    :return: player class instance
+    """
+    conn = None
+    query_result = None
+    error = None
+    ret_player = None
+    try:
+        conn = Connector.DBConnector()
+        get_player_query = sql.SQL("SELECT Team_Id, Age, Height, Preferred_Foot FROM PLAYER"
+                                   " WHERE Player_Id = {Player_Id};").format(Player_Id=sql.Literal(playerID))
+
+        query_result = conn.execute(get_player_query)
+        ret_player = Player(playerID,
+                            query_result[1].rows[0][0],
+                            query_result[1].rows[0][1],
+                            query_result[1].rows[0][2],
+                            query_result[1].rows[0][3])
+    except DatabaseException:
+        error = ReturnValue.ERROR
+    finally:
+        conn.close()
+        if ret_player is None:
+            return Player.badPlayer()
+        return ret_player
 
 #arkadi HA-GAY
 def deletePlayer(player: Player) -> ReturnValue:
@@ -491,6 +545,7 @@ def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnVal
 
 #arkadi HA-GAY
 def matchNotInStadium(match: Match, stadium: Stadium) -> ReturnValue:
+
     pass
 
 #arkadi HA-GAY
@@ -634,7 +689,12 @@ if __name__ == '__main__':
     addMatch(Match(555, 'Domestic', 1, 2))
     eden = getMatchProfile(555)
     print("3. clear all tables")
-    clearTables()
-    print("4. Tring AGIAN to create table ")
-    createTables()
-    dropTables()
+    # clearTables()
+    player_1 = Player(1, 1, 24, 345, 'right')
+    player_2 = Player(2, 1, 24, 555, 'left')
+    addPlayer(player_1)
+    addPlayer(player_2)
+    return_player = getPlayerProfile(1)
+    print(return_player)
+    # createTables()
+    # dropTables()
