@@ -28,6 +28,7 @@ class Test(AbstractTest):
         self.assertEqual(ReturnValue.OK, Solution.addMatch(Match(2, "Domestic", 1, 3)), "Should work")
         self.assertEqual(ReturnValue.OK, Solution.addMatch(Match(3, "Domestic", 1, 4)), "Should work")
         self.assertEqual(ReturnValue.ALREADY_EXISTS, Solution.addMatch(Match(1, "Domestic", 1, 5)), "ID 1 already exists")
+        self.assertEqual(ReturnValue.NOT_EXISTS, Solution.deleteMatch(Match(7, "Domestic", 1, 7)), "ID 7 not exists")
 
     def test_Player(self) -> None:
         self.assertEqual(ReturnValue.OK, Solution.addTeam(1), "Should work")
