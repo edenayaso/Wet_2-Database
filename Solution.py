@@ -291,7 +291,6 @@ def addPlayer(player: Player) -> ReturnValue:
         conn.close()
         return return_value
 
-#arkadi HA-GAY
 def getPlayerProfile(playerID: int) -> Player:
     """
     Returns player profile
@@ -299,8 +298,6 @@ def getPlayerProfile(playerID: int) -> Player:
     :return: player class instance
     """
     conn = None
-    query_result = None
-    error = None
     ret_player = None
     try:
         conn = Connector.DBConnector()
@@ -314,16 +311,36 @@ def getPlayerProfile(playerID: int) -> Player:
                             query_result[1].rows[0][2],
                             query_result[1].rows[0][3])
     except DatabaseException:
-        error = ReturnValue.ERROR
+        conn.close()
+        return Player.badPlayer()
     finally:
         conn.close()
         if ret_player is None:
             return Player.badPlayer()
         return ret_player
 
-#arkadi HA-GAY
+
+# arkadi HA-GAY
 def deletePlayer(player: Player) -> ReturnValue:
-    pass
+    conn = None
+    query_result = None
+    try:
+        conn = Connector.DBConnector()
+        delete_player_query = sql.SQL("DELETE FROM PLAYER "
+                                      "WHERE Player_Id = {Player_Id};") \
+            .format(Player_Id=sql.Literal(player.getPlayerID()))
+        query_result = conn.execute(delete_player_query)
+    except DatabaseException.ConnectionInvalid:
+        conn.close()
+        return ReturnValue.ERROR
+    except DatabaseException.UNKNOWN_ERROR:
+        conn.close()
+        return ReturnValue.ERROR
+    finally:
+        conn.close()
+        if query_result[0] == 0:
+            return ReturnValue.NOT_EXISTS
+        return ReturnValue.OK
 
 #EDEM
 def addStadium(stadium: Stadium) -> ReturnValue:
