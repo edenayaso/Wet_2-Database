@@ -90,9 +90,15 @@ def createTables():
              "FROM Player NATURAL JOIN Scored;"
     createEachTable(schema)
 
+    schema = "CREATE OR REPLACE VIEW Player_Left_Join_Scored AS " \
+             "SELECT Team_Id, P.Player_Id, Match_Id, COALESCE(goals, 0) " \
+             "FROM Player P LEFT OUTER JOIN Scored S " \
+             "ON P.Player_Id=S.Player_Id;"
+    createEachTable(schema)
+
     schema = "CREATE OR REPLACE VIEW Player_Overall_Scored AS " \
-             "SELECT Player_Id, Team_Id, SUM(goals) " \
-             "FROM Player_Join_Scored " \
+             "SELECT Player_Id, Team_Id, SUM(coalesce) " \
+             "FROM Player_Left_Join_Scored " \
              "GROUP BY Player_Id, Team_Id;"
     createEachTable(schema)
 
@@ -158,8 +164,8 @@ def clearTables():
 
 def dropTables():
     conn = Connector.DBConnector()
-    conn.execute("DROP VIEW Goals_In_Stadium")
-    conn.execute("DROP VIEW Active_Teams")
+    # conn.execute("DROP VIEW Active_Teams")
+    # conn.execute("DROP VIEW Goals_In_Stadium")
     tables_names = sql.SQL("SELECT TABLE_NAME FROM INFORMATION_SCHEMA.TABLES "
                     "WHERE TABLE_TYPE={} AND TABLE_SCHEMA={}").format(sql.Literal('BASE TABLE'), sql.Literal('public'))
     result = conn.execute(tables_names)
@@ -761,8 +767,8 @@ def getActiveTallRichTeams() -> List[int]:
         conn.close()
         if query_result[0] == 0:
             return []
-        for team_id in query_result[1].rows[0]:
-            active_rich_tall_teams_list.append(team_id)
+        for team_id in query_result[1].rows:
+            active_rich_tall_teams_list.append(team_id[0])
         return active_rich_tall_teams_list
 
 #eden
@@ -835,16 +841,17 @@ def mostGoalsForTeam(teamID: int) -> List[int]:
         most_goals_for_team_query = sql.SQL("SELECT Player_Id "
                                             "FROM Player_Overall_Scored "
                                             "WHERE Team_Id={Team_Id} "
-                                            "ORDER BY goals, Player_Id DESC "
-                                            "LIMIT 10;").format(Team_Id=sql.Literal(teamID))
+                                            "ORDER BY sum DESC, Player_Id DESC "
+                                            "LIMIT 5;").format(Team_Id=sql.Literal(teamID))
         query_result = conn.execute(most_goals_for_team_query)
-    except DatabaseException:
-        return []
-    finally:
         if query_result[0] == 0:
             return []
-        for player in query_result[1].rows[0]:
-            most_goals_for_team.append(player)
+        for player in query_result[1].rows:
+            most_goals_for_team.append(player[0])
+    except DatabaseException:
+        most_goals_for_team = []
+    finally:
+        conn.close()
         return most_goals_for_team
 
 def getClosePlayers(playerID: int) -> List[int]:
