@@ -695,9 +695,10 @@ def playerIsWinner(playerID: int, matchID: int) -> bool:
     conn, query_result = None, None
     try:
         conn = Connector.DBConnector()
-        winner_player_query = sql.SQL("SELECT goals, sum "
+        winner_player_query = sql.SQL("SELECT Player_Id "
                                       "FROM Goals_In_Match_Join_Scored "
-                                      "WHERE Match_Id={Match_Id} AND Player_Id={Player_Id};").format(Match_Id=sql.Literal(matchID), Player_Id=sql.Literal(playerID))
+                                      "WHERE 2*goals >= sum AND Match_Id={Match_Id} AND Player_Id={Player_Id};")\
+            .format(Match_Id=sql.Literal(matchID), Player_Id=sql.Literal(playerID))
         query_result = conn.execute(winner_player_query)
     except DatabaseException:
         conn.close()
@@ -708,9 +709,9 @@ def playerIsWinner(playerID: int, matchID: int) -> bool:
             return False
         elif query_result[0] == 0:
             return False
-        elif query_result[1].rows[0][1] == 0:
+        elif query_result[0] != 1:
             return False
-        elif query_result[1].rows[0][0] / query_result[1].rows[0][1] >= 0.5:
+        elif query_result[1].rows[0][0] == playerID:
             return True
         else:
             return False
