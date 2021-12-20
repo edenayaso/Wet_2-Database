@@ -62,11 +62,6 @@ def createTables():
              "PRIMARY KEY(Match_Id, Stadium_Id))"
     createEachTable(schema)
 
-    # schema = "CREATE OR REPLACE VIEW Goals_In_Stadium AS " \
-    #          "SELECT S.Player_Id, T.Stadium_Id, S.Goals " \
-    #          "FROM Scored S, Took_Place T " \
-    #          "WHERE S.Match_Id=T.Match_Id"
-    # createEachTable(schema)
     schema = "CREATE OR REPLACE VIEW Goals_In_Stadium AS " \
              "SELECT Player_Id, Stadium_Id, Goals " \
              "FROM Took_Place LEFT OUTER JOIN Scored " \
@@ -302,7 +297,6 @@ def deleteMatch(match: Match) -> ReturnValue:
         conn.close()
         return ret_value
 
-#arkadi HA-GAY
 def addPlayer(player: Player) -> ReturnValue:
     """
     Add player to the database
@@ -330,6 +324,8 @@ def addPlayer(player: Player) -> ReturnValue:
         return_value = ReturnValue.BAD_PARAMS
     except DatabaseException.database_ini_ERROR:
         return_value = ReturnValue.ERROR
+    except DatabaseException.UNKNOWN_ERROR:
+        return_value = ReturnValue.ERROR
     finally:
         conn.close()
         return return_value
@@ -342,17 +338,13 @@ def getPlayerProfile(playerID: int) -> Player:
     """
     conn = None
     ret_player = None
+    query_result = None
     try:
         conn = Connector.DBConnector()
         get_player_query = sql.SQL("SELECT Team_Id, Age, Height, Preferred_Foot FROM PLAYER"
                                    " WHERE Player_Id = {Player_Id};").format(Player_Id=sql.Literal(playerID))
 
         query_result = conn.execute(get_player_query)
-        ret_player = Player(playerID,
-                            query_result[1].rows[0][0],
-                            query_result[1].rows[0][1],
-                            query_result[1].rows[0][2],
-                            query_result[1].rows[0][3])
     except DatabaseException:
         conn.close()
         return Player.badPlayer()
@@ -360,10 +352,15 @@ def getPlayerProfile(playerID: int) -> Player:
         conn.close()
         if ret_player is None:
             return Player.badPlayer()
+        if query_result[0] == 0:
+            return Player.badPlayer()
+        ret_player = Player(playerID,
+                            query_result[1].rows[0][0],
+                            query_result[1].rows[0][1],
+                            query_result[1].rows[0][2],
+                            query_result[1].rows[0][3])
         return ret_player
 
-
-# arkadi HA-GAY
 def deletePlayer(player: Player) -> ReturnValue:
     conn = None
     query_result = None
@@ -381,11 +378,12 @@ def deletePlayer(player: Player) -> ReturnValue:
         return ReturnValue.ERROR
     finally:
         conn.close()
+        if query_result is None:
+            return ReturnValue.Error
         if query_result[0] == 0:
             return ReturnValue.NOT_EXISTS
         return ReturnValue.OK
 
-#EDEM
 def addStadium(stadium: Stadium) -> ReturnValue:
     """
     Add Stadium to the database
@@ -400,9 +398,6 @@ def addStadium(stadium: Stadium) -> ReturnValue:
             format(Stadium_Id=sql.Literal(stadium.getStadiumID()), Capacity=sql.Literal(stadium.getCapacity()),
                    Belong_to=sql.Literal(stadium.getBelongsTo()))
         _ = conn.execute(add_stadium_query)
-        # if rows_effected == 0:
-        #     ret_value = ReturnValue.BAD_PARAMS
-        # else:
         ret_value = ReturnValue.OK
     except DatabaseException.ConnectionInvalid:
         ret_value = ReturnValue.ERROR
@@ -422,8 +417,6 @@ def addStadium(stadium: Stadium) -> ReturnValue:
         conn.close()
         return ret_value
 
-
-#EDEM
 def getStadiumProfile(stadiumID: int) -> Stadium:
     """
     Returns stadium profile of stadiumID
@@ -449,7 +442,6 @@ def getStadiumProfile(stadiumID: int) -> Stadium:
         conn.close()
         return ret_stadium
 
-#EDEM
 def deleteStadium(stadium: Stadium) -> ReturnValue:
     """
     Delete a stadium from the database
@@ -523,7 +515,6 @@ def playerScoredInMatch(match: Match, player: Player, amount: int) -> ReturnValu
         conn.close()
         return ret_value
 
-#EDEN
 def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
     """
     Player didnt scored in match, if the player did, delete its record
@@ -563,7 +554,6 @@ def playerDidntScoreInMatch(match: Match, player: Player) -> ReturnValue:
         conn.close()
         return ret_value
 
-#EDEM
 def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnValue:
     """
     The match is taking place in stadium with attendance spectators
@@ -603,7 +593,6 @@ def matchInStadium(match: Match, stadium: Stadium, attendance: int) -> ReturnVal
         conn.close()
         return ret_value
 
-#arkadi HA-GAY
 def matchNotInStadium(match: Match, stadium: Stadium) -> ReturnValue:
     """
     Check if given match is being played in given stadium
@@ -655,9 +644,6 @@ def averageAttendanceInStadium(stadiumID: int) -> float:
             return 0
         return query_result[1].rows[0][0]
 
-
-
-#EDEM
 def stadiumTotalGoals(stadiumID: int) -> int:
     """
     Returns the total amount of goals scored in stadium with stadiumID
@@ -684,7 +670,6 @@ def stadiumTotalGoals(stadiumID: int) -> int:
         conn.close()
         return ret_sum
 
-#arkadi HA-GAY
 def playerIsWinner(playerID: int, matchID: int) -> bool:
     """
     Decides if a player is a winner in a given match
@@ -716,8 +701,6 @@ def playerIsWinner(playerID: int, matchID: int) -> bool:
         else:
             return False
 
-
-#eden
 def getActiveTallTeams() -> List[int]:
     """
     Returns ta list(up to size 5) of active teams'ID that have at least 2 players over the height of 190cm.
@@ -744,7 +727,6 @@ def getActiveTallTeams() -> List[int]:
         conn.close()
         return active_tall_teams_list
 
-#arkadi HA-GAY
 def getActiveTallRichTeams() -> List[int]:
     """
     Returns the active tallest and richest teams
@@ -772,7 +754,6 @@ def getActiveTallRichTeams() -> List[int]:
             active_rich_tall_teams_list.append(team_id[0])
         return active_rich_tall_teams_list
 
-#eden
 def popularTeams() -> List[int]:
     """
     Returns a list (up to size 10) of teams' IDs that in every single game they played as 'home team'
@@ -802,8 +783,6 @@ def popularTeams() -> List[int]:
         conn.close()
         return popular_teams_list
 
-
-#eden
 def getMostAttractiveStadiums() -> List[int]:
     """
     Returns a list containing attractive stadiums' IDs.
@@ -828,7 +807,6 @@ def getMostAttractiveStadiums() -> List[int]:
         conn.close()
         return most_attractive_stadiums_list
 
-#arkadi HA-GAY
 def mostGoalsForTeam(teamID: int) -> List[int]:
     """
     Returns the players that scored most goals for a given team
@@ -857,49 +835,3 @@ def mostGoalsForTeam(teamID: int) -> List[int]:
 
 def getClosePlayers(playerID: int) -> List[int]:
     pass
-
-if __name__ == '__main__':
-    #dropTables()
-    print("0. Creating all tables")
-    createTables()
-    print("1. Add Teams")
-    addTeam(1)
-    addTeam(2)
-    addTeam(3)
-    addTeam(4)
-    print("1. Add Match")
-    match_1 = Match(555, 'Domestic', 1, 2)
-    match_2 = Match(666, 'Domestic', 3, 4)
-    addMatch(match_1)
-    addMatch(match_2)
-    stadium_1 = Stadium(5, 5000, 2)
-    stadium_2 = Stadium(6, 1000, 3)
-    addStadium(stadium_1)
-    addStadium(stadium_2)
-    player_1 = Player(1, 1, 24, 345, 'right')
-    player_2 = Player(2, 1, 24, 555, 'left')
-    player_3 = Player(3, 2, 24, 555, 'right')
-    player_4 = Player(4, 2, 24, 888, 'right')
-    addPlayer(player_1)
-    addPlayer(player_2)
-    addPlayer(player_3)
-    addPlayer(player_4)
-    return_player = getPlayerProfile(1)
-    matchInStadium(match_1, stadium_1, 500)
-    matchInStadium(match_2, stadium_1, 600)
-    average_1 = averageAttendanceInStadium(stadium_1.getStadiumID())
-    average_2 = averageAttendanceInStadium(stadium_2.getStadiumID())
-    matchNotInStadium(match_1, stadium_1)
-    matchNotInStadium(match_2, stadium_1)
-    average_1 = averageAttendanceInStadium(stadium_1.getStadiumID())
-    playerScoredInMatch(match_1, player_1, 10)
-    playerScoredInMatch(match_1, player_2, 2)
-    playerScoredInMatch(match_1, player_3, 3)
-    ret_1 = playerIsWinner(1, 555)
-    ret_2 = playerIsWinner(2, 555)
-    ret_3 = playerIsWinner(3, 555)
-    ret_4 = playerIsWinner(1, 777)
-    active_tall_teams = getActiveTallTeams()
-    rich_active_tall_teams = getActiveTallRichTeams()
-    print('Test end\'s here')
-    clearTables()
